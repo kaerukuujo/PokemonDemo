@@ -1,6 +1,8 @@
 const canvas = document.querySelector('canvas');
 const c =  canvas.getContext('2d');
 
+// console.log(gsap)
+
 canvas.width = 1024;
 canvas.height = 576;
 
@@ -134,7 +136,8 @@ const battle = {
 }
 
 function animate() {
-    window.requestAnimationFrame(animate);
+    const animationId = window.requestAnimationFrame(animate);
+    // console.log(animationId);
     background.draw()
     boundaries.forEach((boundary) => {
         boundary.draw();        
@@ -145,6 +148,10 @@ function animate() {
     player.draw();    
     foreground.draw();
 
+    let moving = true;
+    player.moving = false;
+
+    console.log(animationId);
     if(battle.initiated) return
 
     // activate a battle
@@ -166,15 +173,36 @@ function animate() {
                  Math.random() < 0.01             
             ) {
               console.log('Activate battle');
+
+              // deactivate current animation loop
+              window.cancelAnimationFrame(animationId);
+
               battle.initiated = true;
+              gsap.to('#overlappingDiv', {
+                opacity: 1,
+                repeat: 3,
+                yoyo: true,
+                duration: 0.4,
+                onComplete() {
+                    gsap.to('#overlappingDiv', {
+                        opacity: 1,
+                        duration: 0.4,
+                        onComplete() {
+                            // activate a new animation loop
+                            animateBattle()
+                            gsap.to('#overlappingDiv', {
+                                opacity: 0,
+                                duration: 0.4
+                            })
+                        }
+                    });                    
+                }                
+              });
               break;
             };
         }
-    };
+    };   
     
-    let moving = true;
-
-    player.moving = false;
     if(keys.w.pressed && lastKey === 'w'){
         player.moving = true;
         player.image = player.sprites.up;
@@ -271,7 +299,24 @@ function animate() {
             });
         };
 };
-animate();
+// animate();
+
+const battleBackgroundImage = new Image();
+battleBackgroundImage.src = './img/battleBackground.png'
+const battleBackground = new Sprite({
+    position: {
+        x: 0, 
+        y: 0
+    },
+    image: battleBackgroundImage
+})
+
+function animateBattle(){
+    window.requestAnimationFrame(animateBattle);
+    battleBackground.draw();
+}
+
+animateBattle();
 
 let lastKey = '';
 window.addEventListener('keydown', (e) => {
