@@ -5,27 +5,23 @@ class Sprite {
         image, 
         frames = { max: 1, hold:  10 }, 
         sprites, 
-        animate = false, 
-        isEnemy = false,
-        rotation = 0,
-        name
+        animate = false,
+        rotation = 0
     }) {
-        this.position = position,
-        this.image = image,
-        this.frames = {...frames, val: 0, elapsed: 0},
-
+        this.position = position;
+        this.image = new Image();
+        this.frames = {...frames, val: 0, elapsed: 0};
         this.image.onload = () => {
             this.width = this.image.width / this.frames.max,
             this.height = this.image.height
-        }   
-        
+        };   
+        this.image.src = image.src;        
         this.animate = animate;
         this.sprites = sprites;
         this.opacity = 1;
-        this.health = 100;
-        this.isEnemy = isEnemy;
+               
         this.rotation = rotation;
-        this.name = name;
+        
     }
 
     draw() {
@@ -63,11 +59,58 @@ class Sprite {
             if(this.frames.val < this.frames.max - 1) this.frames.val++
             else this.frames.val = 0;
         };
-    }; 
-    
+    };  
+};
+
+class Monster extends Sprite {
+
+    constructor({
+        isEnemy = false,
+        name,
+        position, 
+        velocity, 
+        image, 
+        frames = { max: 1, hold:  10 }, 
+        sprites, 
+        animate = false,
+        rotation = 0,
+        attacks
+    }) {
+        super({
+          position, 
+          velocity, 
+          image, 
+          frames, 
+          sprites, 
+          animate,
+          rotation
+        })
+        this.health = 100; 
+        this.isEnemy = isEnemy;
+        this.name = name;
+        this.attacks = attacks;
+    }
+
+    faint() {
+        document.querySelector('#dialogueBox').innerHTML = 
+          this.name + ' fainted!';
+
+        gsap.to(this.position, {
+            y: this.position.y + 20
+        })
+        gsap.to(this, {
+            opacity: 0
+        })
+        audio.battle.stop();
+        audio.victory.play();
+        
+    }
+
+
     attack({ attack, recipient, renderedSprites }){
         document.querySelector('#dialogueBox').style.display = 'block';
-        document.querySelector('#dialogueBox').innerHTML = this.name + ' user ' + attack.name;
+        document.querySelector('#dialogueBox').innerHTML = 
+          this.name + ' user ' + attack.name;
 
         let healthBar = '#enemyHealthBar';
         if(this.isEnemy) healthBar = '#playerHealthBar';
@@ -75,10 +118,11 @@ class Sprite {
         let rotation = 1;
         if(this.isEnemy) rotation = -2.2
 
-        this.health -= attack.damage;
+        recipient.health -= attack.damage;
 
         switch (attack.name) {
             case 'Fireball':
+                audio.initFireball.play();
                 const fireballImage = new Image();
                 fireballImage.src = './img/fireball.png';
                 const fireball = new Sprite({
@@ -102,8 +146,9 @@ class Sprite {
                     y: recipient.position.y,
                     onComplete: () => {                        
                         //Enemy actually gets hit
+                        audio.fireballHit.play();
                         gsap.to(healthBar, {
-                            width: this.health + '%'
+                            width: recipient.health + '%'
                         })
         
                         gsap.to(recipient.position, {
@@ -138,8 +183,9 @@ class Sprite {
                     duration: 0.1,
                     onComplete: () => {
                         //Enemy actually gets hit
+                        audio.tackleHit.play();
                         gsap.to(healthBar, {
-                            width: this.health + '%'
+                            width: recipient.health + '%'
                         })
         
                         gsap.to(recipient.position, {
@@ -162,8 +208,8 @@ class Sprite {
                 })
             break;
         }        
-    };    
-};
+    };
+}
 
 class Boundary {
     static width = 48;
@@ -175,7 +221,7 @@ class Boundary {
     }
 
     draw() {
-        c.fillStyle = 'rgba(255, 0, 0, .5)';
+        c.fillStyle = 'rgba(255, 0, 0, 0)';
         c.fillRect(this.position.x, this.position.y, this.width, this.height);
     }
 };

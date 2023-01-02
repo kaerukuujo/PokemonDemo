@@ -152,7 +152,7 @@ function animate() {
     let moving = true;
     player.animate = false;
 
-    console.log(animationId);
+    // console.log(animationId);
     if(battle.initiated) return
 
     // activate a battle
@@ -177,7 +177,10 @@ function animate() {
 
               // deactivate current animation loop
               window.cancelAnimationFrame(animationId);
-
+              
+              audio.Map.stop();
+              audio.initBattle.play();
+              audio.battle.play();
               battle.initiated = true;
               gsap.to('#overlappingDiv', {
                 opacity: 1,
@@ -190,7 +193,8 @@ function animate() {
                         duration: 0.4,
                         onComplete() {
                             // activate a new animation loop
-                            animateBattle()
+                            initBattle();
+                            animateBattle();
                             gsap.to('#overlappingDiv', {
                                 opacity: 0,
                                 duration: 0.4
@@ -342,3 +346,11 @@ window.addEventListener('keyup', (e) => {
     }
     // console.log(keys);
 });
+
+let clicked = false;
+addEventListener('click', () => {
+    if(!clicked){
+        audio.Map.play(); 
+        clicked = true;
+    }    
+})
