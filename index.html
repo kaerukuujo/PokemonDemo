@@ -113,13 +113,27 @@
             display: flex;
             "
         >
-        <div style="
+        <div
+        id="dialogueBox" 
+        style="position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: white;
+        padding: 12px;
+        display: none;
+        cursor: pointer;
+        ">
+            egsgesgseges
+        </div>
+        <div
+        id="attacksBox" 
+        style="
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           width: 66.66%;          
         ">
-            <button>Tackle</button>
-            <button>Fireball</button>
         </div>
         <div style="
           display: flex; 
@@ -135,7 +149,9 @@
     <script src="data/collisions.js"></script>
     <script src="data/battleZones.js"></script>
     <script src="data/attacks.js"></script>
+    <script src="data/monsters.js"></script>
     <script src="classes.js"></script>
     <script src="index.js"></script>
+    <script src="battleScene.js"></script>
 </body>
 </html>
